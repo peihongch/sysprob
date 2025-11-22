@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "cmd/cpu_cmd.h"
+#include "util/log_util.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -12,6 +14,6 @@ int main(int argc, char *argv[]) {
         return run_cpu_cmd(argc - 1, argv + 1);
     }
 
-    printf("Unknown command: %s\n", argv[1]);
+    LOG_ERROR("Unknown command: %s", argv[1]);
     return 0;
 }

@@ -1,51 +1,58 @@
 #include <stdio.h>
 #include <unistd.h>
 
-struct cpu_time {
-    long user;
-    long nice;
-    long system;
-    long idle;
-};
+#include "cpu_probe.h"
+#include "../util/procfs_util.h"
+#include "../util/log_util.h"
 
-static long get_cpu_time(struct cpu_time *cpu_time) {
-    FILE *file = fopen("/proc/stat", "r");
-    if (!file) {
-        perror("Unable to open /proc/stat");
-        return -1;
-    }
+static struct cpu_time prev = {0};
 
-    // Read the first line, which contains CPU usage data
-    if (fscanf(file, "cpu %ld %ld %ld %ld",
-                     &cpu_time->user,
-                     &cpu_time->nice,
-                     &cpu_time->system,
-                     &cpu_time->idle) != 4) {
-        perror("Failed to read /proc/stat");
-        fclose(file);
-        return -1;
-    }
-
-    fclose(file);
-    return 0;
+static inline double cpu_time_total(struct cpu_time *ct) {
+    return ct->user + ct->nice + ct->system + ct->idle;
 }
 
-static double sample_cpu_usage(int interval) {
-    struct cpu_time prev, curr;
+static inline long cpu_time_busy(struct cpu_time *ct) {
+    return ct->user + ct->nice + ct->system;
+}
 
-    get_cpu_time(&prev);
+static double cal_cpu_usage(struct cpu_time prev, struct cpu_time curr) {
+    long busy = cpu_time_busy(&curr) - cpu_time_busy(&prev);
+    long total = cpu_time_total(&curr) - cpu_time_total(&prev);
+
+    if (total <= 0) {
+        LOG_WARN("Total CPU time difference is non-positive: %ld", total);
+        return 0.0;
+    }
+
+    return (double)busy / total * 100.0;
+}
+
+static double cal_cpu_user_usage(struct cpu_time prev, struct cpu_time curr) {
+    long user = curr.user - prev.user;
+    long total = cpu_time_total(&curr) - cpu_time_total(&prev);
+
+    if (total <= 0) {
+        LOG_WARN("Total CPU time difference is non-positive: %ld", total);
+        return 0.0;
+    }
+
+    return (double)user / total * 100.0;
+}
+
+long probe_cpu_usage(int interval, cpu_usage_type_t type) {
+    struct cpu_time curr;
+    double usage;
+
+    read_cpu_time(&prev);
     sleep(interval);
-    get_cpu_time(&curr);
+    read_cpu_time(&curr);
 
-    long busy = (curr.user + curr.nice + curr.system) - (prev.user + prev.nice + prev.system);
-    long total = (curr.user + curr.nice + curr.system + curr.idle) - (prev.user + prev.nice + prev.system + prev.idle);
-
-    return (double)busy / total * 100;
-}
-
-void run_cpu_probe(int interval) {
-    while (1) {
-        double usage = sample_cpu_usage(interval);
-        printf("CPU: %.2f%%\n", usage);
+    if (type == CPU_USAGE_TOTAL) {
+        usage = cal_cpu_usage(prev, curr);
+    } else if (type == CPU_USAGE_USER) {
+        usage = cal_cpu_user_usage(prev, curr);
     }
+
+    prev = curr;
+    return usage;
 }
