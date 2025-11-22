@@ -1,0 +1,5 @@
+# Ignore executables
+
+*.o
+
+sysprob_cpu_sample
