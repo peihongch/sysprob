@@ -2,4 +2,4 @@
 
 *.o
 
-sysprob_cpu_sample
+sysprob*
