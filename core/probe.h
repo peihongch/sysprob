@@ -1,6 +1,8 @@
 #ifndef PROBE_H
 #define PROBE_H
 
+#include <stdbool.h>
+
 #include "../report/reporter.h"
 
 typedef struct ProbeOptions {
@@ -19,5 +21,6 @@ typedef struct Probe {
 } Probe;
 
 int run_probe(Probe *probe, ProbeOptions *options);
+int run_probe_once(Probe *probe, ProbeOptions *options, bool output);
 
 #endif

@@ -11,12 +11,6 @@ static int disk_collect(Probe *self, ProbeOptions *options);
 static int disk_compute_metrics(Probe *self, ProbeOptions *options);
 static int disk_display(Probe *self, ProbeOptions *options);
 
-typedef struct {
-    long root_total_kb;
-    long root_free_kb;
-    double root_usage_percent;
-} disk_probe_data_t;
-
 static disk_probe_data_t disk_data;
 
 static struct Probe disk_probe = {

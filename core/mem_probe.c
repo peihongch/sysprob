@@ -11,12 +11,6 @@ static int mem_collect(Probe *self, ProbeOptions *options);
 static int mem_compute_metrics(Probe *self, ProbeOptions *options);
 static int mem_display(Probe *self, ProbeOptions *options);
 
-typedef struct {
-    long total_mem_kb;
-    long free_mem_kb;
-    double mem_usage_percent;
-} mem_probe_data_t;
-
 static mem_probe_data_t mem_data;
 
 static struct Probe mem_probe = {

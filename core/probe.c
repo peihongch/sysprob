@@ -23,21 +23,37 @@ int run_probe(Probe *probe, ProbeOptions *options) {
     while (1) {
         sleep(interval);
 
-        if (probe->collect)
-            if (probe->collect(probe, options) != 0) {
-                LOG_ERROR("Failed to collect data for probe %s", probe->name);
-                return -1;
-            }
-        if (probe->compute)
-            if (probe->compute(probe, options) != 0) {
-                LOG_ERROR("Failed to compute metrics for probe %s", probe->name);
-                return -1;
-            }
-        if (probe->display) {
-            if (probe->display(probe, options) != 0) {
-                LOG_ERROR("Failed to display data for probe %s", probe->name);
-                return -1;
-            }
+        if (run_probe_once(probe, options, true) != 0) {
+            LOG_ERROR("Probe %s encountered an error during execution", probe->name);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+int run_probe_once(Probe *probe, ProbeOptions *options, bool output) {
+    if (!probe) {
+        LOG_ERROR("Probe is NULL");
+        return -1;
+    }
+
+    LOG_INFO("Running probe %s once", probe->name);
+
+    if (probe->collect)
+        if (probe->collect(probe, options) != 0) {
+            LOG_ERROR("Failed to collect data for probe %s", probe->name);
+            return -1;
+        }
+    if (probe->compute)
+        if (probe->compute(probe, options) != 0) {
+            LOG_ERROR("Failed to compute metrics for probe %s", probe->name);
+            return -1;
+        }
+    if (probe->display && output) {
+        if (probe->display(probe, options) != 0) {
+            LOG_ERROR("Failed to display data for probe %s", probe->name);
+            return -1;
         }
     }
 

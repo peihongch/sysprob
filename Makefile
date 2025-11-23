@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall
 
 OBJS = main.o \
-	cmd/cpu_cmd.o cmd/mem_cmd.o cmd/disk_cmd.o cmd/net_cmd.o \
-	core/cpu_probe.o core/probe.o core/mem_probe.o core/disk_probe.o core/net_probe.o \
+	cmd/cpu_cmd.o cmd/mem_cmd.o cmd/disk_cmd.o cmd/net_cmd.o cmd/summary_cmd.o \
+	core/cpu_probe.o core/probe.o core/mem_probe.o core/disk_probe.o core/net_probe.o core/summary.o \
 	plugin/plugin.o \
 	report/reporter.o report/text_reporter.o report/csv_reporter.o report/json_reporter.o \
 	conf/config.o \

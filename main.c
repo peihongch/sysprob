@@ -6,6 +6,7 @@
 #include "cmd/mem_cmd.h"
 #include "cmd/disk_cmd.h"
 #include "cmd/net_cmd.h"
+#include "cmd/summary_cmd.h"
 #include "plugin/plugin.h"
 #include "util/logger.h"
 #include "conf/config.h"
@@ -47,7 +48,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (strcmp(argv[1], "cpu") == 0) {
+    if (strcmp(argv[1], "summary") == 0) {
+        return run_summary_cmd(&config, argc - 1, argv + 1);
+    } else if (strcmp(argv[1], "cpu") == 0) {
         if (!config.cpu_probe_enabled) {
             LOG_ERROR("CPU probe is disabled in the configuration");
             printf("CPU probe is disabled in the configuration\n");

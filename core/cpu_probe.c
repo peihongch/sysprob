@@ -13,12 +13,6 @@ static int cpu_collect(Probe *self, ProbeOptions *options);
 static int cpu_compute_metrics(Probe *self, ProbeOptions *options);
 static int cpu_display(Probe *self, ProbeOptions *options);
 
-typedef struct {
-    struct cpu_time last_cpu_time;
-    struct cpu_time current_cpu_time;
-    double cpu_usage;
-} cpu_probe_data_t;
-
 static cpu_probe_data_t cpu_data;
 
 static struct Probe cpu_probe = {

@@ -11,15 +11,6 @@ static int net_collect(Probe *self, ProbeOptions *options);
 static int net_compute_metrics(Probe *self, ProbeOptions *options);
 static int net_display(Probe *self, ProbeOptions *options);
 
-typedef struct {
-    long last_rx_bytes;
-    long last_tx_bytes;
-    long rx_bytes;
-    long tx_bytes;
-    double rx_rate;
-    double tx_rate;
-} net_probe_data_t;
-
 static net_probe_data_t net_data;
 
 static struct Probe net_probe = {
