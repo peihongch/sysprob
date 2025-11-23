@@ -5,6 +5,7 @@
 #include "cmd/mem_cmd.h"
 #include "cmd/disk_cmd.h"
 #include "cmd/net_cmd.h"
+#include "plugin/plugin.h"
 #include "util/logger.h"
 
 /**
@@ -75,6 +76,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    if (load_plugins() != 0) {
+        LOG_ERROR("Failed to load plugins");
+        return -1;
+    }
+
     if (strcmp(argv[1], "cpu") == 0) {
         return run_cpu_cmd(argc - 1, argv + 1);
     } else if (strcmp(argv[1], "mem") == 0) {
@@ -83,8 +89,13 @@ int main(int argc, char *argv[]) {
         return run_disk_cmd(argc - 1, argv + 1);
     } else if (strcmp(argv[1], "net") == 0) {
         return run_net_cmd(argc - 1, argv + 1);
+    } else {
+        if (run_plugin(argv[1], argc - 1, argv + 1) != 0) {
+            LOG_ERROR("Unknown command or plugin: %s", argv[1]);
+            printf("Unknown command or plugin: %s\n", argv[1]);
+            return -1;
+        }
     }
 
-    LOG_ERROR("Unknown command: %s", argv[1]);
     return 0;
 }
