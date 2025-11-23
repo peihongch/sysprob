@@ -6,6 +6,6 @@ typedef enum {
     CPU_USAGE_USER
 } cpu_usage_type_t;
 
-long probe_cpu_usage(int interval, cpu_usage_type_t type);
+Probe *get_cpu_probe(void);
 
 #endif

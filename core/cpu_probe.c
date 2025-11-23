@@ -1,11 +1,33 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
+#include "probe.h"
 #include "cpu_probe.h"
 #include "../util/procfs_util.h"
 #include "../util/log_util.h"
 
-static struct cpu_time prev = {0};
+static int cpu_init(Probe *self);
+static int cpu_collect(Probe *self, ProbeOptions *options);
+static int cpu_compute_metrics(Probe *self, ProbeOptions *options);
+static int cpu_display(Probe *self, ProbeOptions *options);
+
+typedef struct {
+    struct cpu_time last_cpu_time;
+    struct cpu_time current_cpu_time;
+    double cpu_usage;
+} cpu_probe_data_t;
+
+static cpu_probe_data_t cpu_data;
+
+static struct Probe cpu_probe = {
+    .name = "CPU Probe",
+    .init = cpu_init,
+    .collect = cpu_collect,
+    .compute = cpu_compute_metrics,
+    .display = cpu_display,
+    .private_data = &cpu_data
+};
 
 static inline double cpu_time_total(struct cpu_time *ct) {
     return ct->user + ct->nice + ct->system + ct->idle;
@@ -39,20 +61,60 @@ static double cal_cpu_user_usage(struct cpu_time prev, struct cpu_time curr) {
     return (double)user / total * 100.0;
 }
 
-long probe_cpu_usage(int interval, cpu_usage_type_t type) {
-    struct cpu_time curr;
-    double usage;
+static int cpu_init(struct Probe *self) {
+    cpu_probe_data_t *data = (cpu_probe_data_t *)self->private_data;
+    data->last_cpu_time = (struct cpu_time){0};
+    data->cpu_usage = 0.0;
 
-    read_cpu_time(&prev);
-    sleep(interval);
-    read_cpu_time(&curr);
+    read_cpu_time(&data->last_cpu_time);
+    return 0;
+}
 
-    if (type == CPU_USAGE_TOTAL) {
-        usage = cal_cpu_usage(prev, curr);
-    } else if (type == CPU_USAGE_USER) {
-        usage = cal_cpu_user_usage(prev, curr);
+static int cpu_collect(Probe *self, ProbeOptions *options) {
+    cpu_probe_data_t *data = (cpu_probe_data_t *)self->private_data;
+    struct cpu_time current_cpu_time;
+
+    if (read_cpu_time(&current_cpu_time) != 0) {
+        LOG_ERROR("Failed to read CPU time");
+        return -1;
     }
 
-    prev = curr;
-    return usage;
+    data->current_cpu_time = current_cpu_time;
+    return 0;
+}
+
+static int cpu_compute_metrics(Probe *self, ProbeOptions *options) {
+    cpu_usage_type_t type = (cpu_usage_type_t)options->extra;
+    cpu_probe_data_t *data = (cpu_probe_data_t *)self->private_data;
+
+    switch (type) {
+    case CPU_USAGE_TOTAL:
+        data->cpu_usage = cal_cpu_usage(data->last_cpu_time, data->current_cpu_time);
+        break;
+    case CPU_USAGE_USER:
+        data->cpu_usage = cal_cpu_user_usage(data->last_cpu_time, data->current_cpu_time);
+        break;
+    }
+
+    data->last_cpu_time = data->current_cpu_time;
+    return 0;
+}
+
+static int cpu_display(Probe *self, ProbeOptions *options) {
+    cpu_usage_type_t type = (cpu_usage_type_t)options->extra;
+    cpu_probe_data_t *data = (cpu_probe_data_t *)self->private_data;
+
+    switch (type) {
+    case CPU_USAGE_TOTAL:
+        printf("CPU Total Usage: %.2f%%\n", data->cpu_usage);
+        break;
+    case CPU_USAGE_USER:
+        printf("CPU User Usage: %.2f%%\n", data->cpu_usage);
+        break;
+    }
+    return 0;
+}
+
+Probe *get_cpu_probe(void) {
+    return &cpu_probe;
 }

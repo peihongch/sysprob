@@ -3,44 +3,41 @@
 #include <string.h>
 #include "cpu_cmd.h"
 
+#include "../core/probe.h"
 #include "../core/cpu_probe.h"
 #include "../util/log_util.h"
 
-static void run_cpu_usage_probe(int interval, cpu_usage_type_t type) {
-    double usage;
-
-    while (1) {
-        usage = probe_cpu_usage(interval, type);
-        switch (type) {
-        case CPU_USAGE_TOTAL:
-            printf("CPU: %.2f%%\n", usage);
-            break;
-        case CPU_USAGE_USER:
-            printf("CPU User: %.2f%%\n", usage);
-            break;
-        }
-    }
-}
-
 int run_cpu_cmd(int argc, char *argv[]) {
-    cpu_usage_type_t type;
+    Probe *cpu_probe;
+    ProbeOptions options;
     int interval = 1;
+    cpu_usage_type_t type;
 
     if (argc >= 2 && strcmp(argv[1], "user") == 0) {
         type = CPU_USAGE_USER;
+        argc--;
+        argv++;
     } else {
         type = CPU_USAGE_TOTAL;
     }
 
-    if (argc >= 3) {
-        interval = atoi(argv[2]);
+    if (argc >= 2) {
+        interval = atoi(argv[1]);
         if (interval <= 0) {
             interval = 1;
             LOG_WARN("Interval must be a positive number, use default %ds.", interval);
         }
     }
 
-    run_cpu_usage_probe(interval, type);
+    cpu_probe = get_cpu_probe();
+    if (!cpu_probe) {
+        LOG_ERROR("Failed to create CPU probe");
+        return -1;
+    }
+
+    options.interval = interval;
+    options.extra = (void *)type;
+    run_probe(cpu_probe, &options);
 
     return 0;
 }
