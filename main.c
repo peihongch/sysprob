@@ -7,10 +7,72 @@
 #include "cmd/net_cmd.h"
 #include "util/logger.h"
 
+/**
+ * Logger configuration file:
+ *
+ *  log.level = INFO
+ *  log.file = /var/log/sysprob.log
+ */
+#define LOGGER_CONFIG_FILE "sysprob.logcfg"
+
+static int setup_logger() {
+    log_level_t level;
+    char *log_file;
+
+    // read logger configuration from file
+    FILE *file = fopen(LOGGER_CONFIG_FILE, "r");
+    if (file) {
+        char line[256];
+        while (fgets(line, sizeof(line), file)) {
+            if (strncmp(line, "log.level =", 11) == 0) {
+                char *level_str = line + 11;
+
+                while (*level_str == ' ')
+                    level_str++;
+
+                if (strncmp(level_str, "INFO", 4) == 0) {
+                    level = LOG_LEVEL_INFO;
+                } else if (strncmp(level_str, "WARN", 4) == 0) {
+                    level = LOG_LEVEL_WARN;
+                } else if (strncmp(level_str, "ERROR", 5) == 0) {
+                    level = LOG_LEVEL_ERROR;
+                } else {
+                    level = LOG_LEVEL_INFO; // default
+                }
+            } else if (strncmp(line, "log.file =", 10) == 0) {
+                log_file = line + 10;
+
+                while (*log_file == ' ')
+                    log_file++;
+
+                char *newline = strchr(log_file, '\n');
+                if (newline)
+                    *newline = '\0';
+            }
+        }
+        fclose(file);
+    } else {
+        // default configuration
+        level = LOG_LEVEL_INFO;
+        log_file = NULL;
+    }
+
+    if (logger_init(level, log_file) != 0) {
+        fprintf(stderr, "Failed to initialize logger\n");
+        return -1;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Usage: sysprob cpu [interval]\n");
         return 0;
+    }
+
+    if (setup_logger() != 0) {
+        printf("Failed to set up logger\n");
+        return -1;
     }
 
     if (strcmp(argv[1], "cpu") == 0) {
