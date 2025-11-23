@@ -107,9 +107,11 @@ static int cpu_display(Probe *self, ProbeOptions *options) {
     switch (type) {
     case CPU_USAGE_TOTAL:
         printf("CPU Total Usage: %.2f%%\n", data->cpu_usage);
+        LOG_INFO("CPU Total Usage: %.2f%%", data->cpu_usage);
         break;
     case CPU_USAGE_USER:
         printf("CPU User Usage: %.2f%%\n", data->cpu_usage);
+        LOG_INFO("CPU User Usage: %.2f%%", data->cpu_usage);
         break;
     }
     return 0;

@@ -70,5 +70,7 @@ static int disk_display(Probe *self, ProbeOptions *options) {
     disk_probe_data_t *data = (disk_probe_data_t *)self->private_data;
     printf("Disk Usage for /: Total: %ld kB, Free: %ld kB, Usage: %.2f%%\n",
            data->root_total_kb, data->root_free_kb, data->root_usage_percent);
+    LOG_INFO("Disk Usage for /: Total: %ld kB, Free: %ld kB, Usage: %.2f%%",
+             data->root_total_kb, data->root_free_kb, data->root_usage_percent);
     return 0;
 }

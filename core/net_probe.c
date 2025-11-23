@@ -90,5 +90,7 @@ static int net_display(Probe *self, ProbeOptions *options) {
     net_probe_data_t *data = (net_probe_data_t *)self->private_data;
     printf("Network RX Rate: %.2f Kb/s, TX Rate: %.2f Kb/s\n",
               net_rate_kbps(data->rx_rate), net_rate_kbps(data->tx_rate));
+    LOG_INFO("Network RX Rate: %.2f Kb/s, TX Rate: %.2f Kb/s",
+             net_rate_kbps(data->rx_rate), net_rate_kbps(data->tx_rate));
     return 0;
 }

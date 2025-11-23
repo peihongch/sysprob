@@ -89,5 +89,9 @@ static int mem_display(Probe *self, ProbeOptions *options) {
            data->mem_usage_percent,
            data->total_mem_kb,
            data->free_mem_kb);
+    LOG_INFO("Memory Usage: %.2f%% (Total: %ld kB, Free: %ld kB)",
+             data->mem_usage_percent,
+             data->total_mem_kb,
+             data->free_mem_kb);
     return 0;
 }

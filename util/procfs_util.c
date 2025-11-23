@@ -1,11 +1,12 @@
 #include <stdio.h>
 
+#include "logger.h"
 #include "procfs_util.h"
 
 int read_cpu_time(struct cpu_time *cpu_time) {
     FILE *file = fopen("/proc/stat", "r");
     if (!file) {
-        perror("Unable to open /proc/stat");
+        LOG_ERROR("Unable to open /proc/stat");
         return -1;
     }
 
@@ -14,10 +15,13 @@ int read_cpu_time(struct cpu_time *cpu_time) {
                &cpu_time->nice,
                &cpu_time->system,
                &cpu_time->idle) != 4) {
-        perror("Failed to read /proc/stat");
+        LOG_ERROR("Failed to read CPU times from /proc/stat");
         fclose(file);
         return -1;
     }
+
+    LOG_INFO("CPU times read from /proc/stat: user =%ld, nice=%ld, system=%ld, idle=%ld",
+             cpu_time->user, cpu_time->nice, cpu_time->system, cpu_time->idle);
 
     fclose(file);
     return 0;
@@ -26,7 +30,7 @@ int read_cpu_time(struct cpu_time *cpu_time) {
 int read_mem_info(struct mem_info *mem_info) {
     FILE *file = fopen("/proc/meminfo", "r");
     if (!file) {
-        perror("Unable to open /proc/meminfo");
+        LOG_ERROR("Unable to open /proc/meminfo");
         return -1;
     }
 
@@ -38,6 +42,9 @@ int read_mem_info(struct mem_info *mem_info) {
             continue;
     }
 
+    LOG_INFO("Memory info read from /proc/meminfo: total =%ld kB, free=%ld kB",
+             mem_info->total_kb, mem_info->free_kb);
+
     fclose(file);
     return 0;
 }
@@ -45,7 +52,7 @@ int read_mem_info(struct mem_info *mem_info) {
 int read_net_dev_stats(struct net_dev_stats *stats) {
     FILE *file = fopen("/proc/net/dev", "r");
     if (!file) {
-        perror("Unable to open /proc/net/dev");
+        LOG_ERROR("Unable to open /proc/net/dev");
         return -1;
     }
 
@@ -66,6 +73,9 @@ int read_net_dev_stats(struct net_dev_stats *stats) {
             stats->tx_bytes += tx_bytes;
         }
     }
+
+    LOG_INFO("Network device stats read from /proc/net/dev: rx_bytes =%ld, tx_bytes=%ld",
+             stats->rx_bytes, stats->tx_bytes);
 
     fclose(file);
     return 0;
