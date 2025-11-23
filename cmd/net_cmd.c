@@ -4,7 +4,7 @@
 #include "net_cmd.h"
 #include "../core/probe.h"
 #include "../core/net_probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 int run_net_cmd(int argc, char *argv[]) {
     Probe *net_probe;

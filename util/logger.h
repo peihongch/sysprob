@@ -1,5 +1,5 @@
-#ifndef LOG_UTIL_H
-#define LOG_UTIL_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #define LOG_INFO(msg, ...) \
     log_info("%s:%d:%s: " msg, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
@@ -12,4 +12,4 @@ void log_info(const char *format, ...);
 void log_warn(const char *format, ...);
 void log_error(const char *format, ...);
 
-#endif /* LOG_UTIL_H */
+#endif /* LOGGER_H */

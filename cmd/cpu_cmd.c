@@ -5,7 +5,7 @@
 
 #include "../core/probe.h"
 #include "../core/cpu_probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 int run_cpu_cmd(int argc, char *argv[]) {
     Probe *cpu_probe;

@@ -5,7 +5,7 @@
 #include "cmd/mem_cmd.h"
 #include "cmd/disk_cmd.h"
 #include "cmd/net_cmd.h"
-#include "util/log_util.h"
+#include "util/logger.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {

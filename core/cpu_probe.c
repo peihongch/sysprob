@@ -5,7 +5,7 @@
 #include "probe.h"
 #include "cpu_probe.h"
 #include "../util/procfs_util.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 static int cpu_init(Probe *self);
 static int cpu_collect(Probe *self, ProbeOptions *options);

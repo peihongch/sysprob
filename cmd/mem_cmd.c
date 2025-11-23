@@ -4,7 +4,7 @@
 #include "mem_cmd.h"
 #include "../core/probe.h"
 #include "../core/mem_probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 int run_mem_cmd(int argc, char *argv[]) {
     Probe *mem_probe;

@@ -4,7 +4,7 @@
 
 #include "probe.h"
 #include "disk_probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 static int disk_init(Probe *self);
 static int disk_collect(Probe *self, ProbeOptions *options);

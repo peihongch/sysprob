@@ -1,7 +1,7 @@
 #include <unistd.h>
 
 #include "probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 int run_probe(Probe *probe, ProbeOptions *options) {
     int interval = options ? options->interval : 1;

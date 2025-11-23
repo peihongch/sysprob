@@ -4,7 +4,7 @@
 #include "probe.h"
 #include "mem_probe.h"
 #include "../util/procfs_util.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 static int mem_init(Probe *self);
 static int mem_collect(Probe *self, ProbeOptions *options);

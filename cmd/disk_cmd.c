@@ -4,7 +4,7 @@
 #include "disk_cmd.h"
 #include "../core/probe.h"
 #include "../core/disk_probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 
 int run_disk_cmd(int argc, char *argv[]) {
     Probe *disk_probe;

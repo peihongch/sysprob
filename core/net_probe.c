@@ -3,7 +3,7 @@
 
 #include "probe.h"
 #include "net_probe.h"
-#include "../util/log_util.h"
+#include "../util/logger.h"
 #include "../util/procfs_util.h"
 
 static int net_init(Probe *self);
