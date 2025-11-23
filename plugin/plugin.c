@@ -83,14 +83,14 @@ int load_plugins(void) {
     return 0;
 }
 
-int run_plugin(const char *plugin_name, int argc, char *argv[]) {
+int run_plugin(const char *plugin_name, config_t *config, int argc, char *argv[]) {
     Plugin *plugin = find_plugin_by_name(plugin_name);
     if (!plugin) {
         return -1;
     }
 
     ProbeOptions options;
-    options.interval = 1;
+    options.interval = config->interval;
     options.extra = NULL;
 
     if (argc >= 2) {

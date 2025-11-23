@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "cmd/cpu_cmd.h"
 #include "cmd/mem_cmd.h"
@@ -7,72 +8,27 @@
 #include "cmd/net_cmd.h"
 #include "plugin/plugin.h"
 #include "util/logger.h"
-
-/**
- * Logger configuration file:
- *
- *  log.level = INFO
- *  log.file = /var/log/sysprob.log
- */
-#define LOGGER_CONFIG_FILE "sysprob.logcfg"
-
-static int setup_logger() {
-    log_level_t level;
-    char *log_file;
-
-    // read logger configuration from file
-    FILE *file = fopen(LOGGER_CONFIG_FILE, "r");
-    if (file) {
-        char line[256];
-        while (fgets(line, sizeof(line), file)) {
-            if (strncmp(line, "log.level =", 11) == 0) {
-                char *level_str = line + 11;
-
-                while (*level_str == ' ')
-                    level_str++;
-
-                if (strncmp(level_str, "INFO", 4) == 0) {
-                    level = LOG_LEVEL_INFO;
-                } else if (strncmp(level_str, "WARN", 4) == 0) {
-                    level = LOG_LEVEL_WARN;
-                } else if (strncmp(level_str, "ERROR", 5) == 0) {
-                    level = LOG_LEVEL_ERROR;
-                } else {
-                    level = LOG_LEVEL_INFO; // default
-                }
-            } else if (strncmp(line, "log.file =", 10) == 0) {
-                log_file = line + 10;
-
-                while (*log_file == ' ')
-                    log_file++;
-
-                char *newline = strchr(log_file, '\n');
-                if (newline)
-                    *newline = '\0';
-            }
-        }
-        fclose(file);
-    } else {
-        // default configuration
-        level = LOG_LEVEL_INFO;
-        log_file = NULL;
-    }
-
-    if (logger_init(level, log_file) != 0) {
-        fprintf(stderr, "Failed to initialize logger\n");
-        return -1;
-    }
-    return 0;
-}
+#include "conf/config.h"
 
 int main(int argc, char *argv[]) {
+    config_t config = {
+        .interval = 1,
+        .output_format = "text",
+        .cpu_probe_enabled = 1,
+        .mem_probe_enabled = 1,
+        .disk_probe_enabled = 1,
+        .net_probe_enabled = 1,
+        .plugin_enabled = 1,
+    };
+    int i;
+
     if (argc < 2) {
         printf("Usage: sysprob cpu [interval]\n");
         return 0;
     }
 
-    if (setup_logger() != 0) {
-        printf("Failed to set up logger\n");
+    if (load_config(&config) != 0) {
+        fprintf(stderr, "Failed to load configuration\n");
         return -1;
     }
 
@@ -81,16 +37,51 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--output=csv") == 0) {
+            config.output_format = "csv";
+        } else if (strcmp(argv[i], "--output=json") == 0) {
+            config.output_format = "json";
+        } else if (atoi(argv[i]) > 0) {
+            config.interval = atoi(argv[i]);
+        }
+    }
+
     if (strcmp(argv[1], "cpu") == 0) {
-        return run_cpu_cmd(argc - 1, argv + 1);
+        if (!config.cpu_probe_enabled) {
+            LOG_ERROR("CPU probe is disabled in the configuration");
+            printf("CPU probe is disabled in the configuration\n");
+            return -1;
+        }
+        return run_cpu_cmd(&config, argc - 1, argv + 1);
     } else if (strcmp(argv[1], "mem") == 0) {
-        return run_mem_cmd(argc - 1, argv + 1);
+        if (!config.mem_probe_enabled) {
+            LOG_ERROR("Memory probe is disabled in the configuration");
+            printf("Memory probe is disabled in the configuration\n");
+            return -1;
+        }
+        return run_mem_cmd(&config, argc - 1, argv + 1);
     } else if (strcmp(argv[1], "disk") == 0) {
-        return run_disk_cmd(argc - 1, argv + 1);
+        if (!config.disk_probe_enabled) {
+            LOG_ERROR("Disk probe is disabled in the configuration");
+            printf("Disk probe is disabled in the configuration\n");
+            return -1;
+        }
+        return run_disk_cmd(&config, argc - 1, argv + 1);
     } else if (strcmp(argv[1], "net") == 0) {
-        return run_net_cmd(argc - 1, argv + 1);
+        if (!config.net_probe_enabled) {
+            LOG_ERROR("Network probe is disabled in the configuration");
+            printf("Network probe is disabled in the configuration\n");
+            return -1;
+        }
+        return run_net_cmd(&config, argc - 1, argv + 1);
     } else {
-        if (run_plugin(argv[1], argc - 1, argv + 1) != 0) {
+        if (!config.plugin_enabled) {
+            LOG_ERROR("Plugin support is disabled in the configuration");
+            printf("Plugin support is disabled in the configuration\n");
+            return -1;
+        }
+        if (run_plugin(argv[1], &config, argc - 1, argv + 1) != 0) {
             LOG_ERROR("Unknown command or plugin: %s", argv[1]);
             printf("Unknown command or plugin: %s\n", argv[1]);
             return -1;

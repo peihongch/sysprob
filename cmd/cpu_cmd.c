@@ -7,24 +7,26 @@
 #include "../core/cpu_probe.h"
 #include "../util/logger.h"
 
-int run_cpu_cmd(int argc, char *argv[]) {
+int run_cpu_cmd(config_t *config, int argc, char *argv[]) {
     Probe *cpu_probe;
     ProbeOptions options = {
-        .interval = 1,
+        .interval = config->interval,
         .report_format = REPORTER_FORMAT_TEXT,
     };
     cpu_usage_type_t type = CPU_USAGE_TOTAL;
     int i;
 
-    for (i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--output=csv") == 0) {
+    if (config->output_format != NULL) {
+        if (strcmp(config->output_format, "csv") == 0) {
             options.report_format = REPORTER_FORMAT_CSV;
-        } else if (strcmp(argv[i], "--output=json") == 0) {
+        } else if (strcmp(config->output_format, "json") == 0) {
             options.report_format = REPORTER_FORMAT_JSON;
-        } else if (strcmp(argv[i], "user") == 0) {
+        }
+    }
+
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "user") == 0) {
             type = CPU_USAGE_USER;
-        } else if (atoi(argv[i]) > 0) {
-            options.interval = atoi(argv[i]);
         }
     }
 
