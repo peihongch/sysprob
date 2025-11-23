@@ -3,6 +3,7 @@
 #include "reporter.h"
 #include "text_reporter.h"
 #include "csv_reporter.h"
+#include "json_reporter.h"
 #include "../util/logger.h"
 
 #define MAX_REPORTERS 10
@@ -10,6 +11,7 @@
 static Reporter *reporters[MAX_REPORTERS] = {
     [REPORTER_FORMAT_TEXT] = &text_reporter,
     [REPORTER_FORMAT_CSV] = &csv_reporter,
+    [REPORTER_FORMAT_JSON] = &json_reporter,
 };
 
 Reporter *get_reporter(reporter_format_t format) {

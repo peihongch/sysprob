@@ -4,6 +4,7 @@
 typedef enum {
     REPORTER_FORMAT_TEXT,
     REPORTER_FORMAT_CSV,
+    REPORTER_FORMAT_JSON,
 } reporter_format_t;
 
 typedef struct {

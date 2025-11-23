@@ -19,6 +19,8 @@ int run_cpu_cmd(int argc, char *argv[]) {
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--output=csv") == 0) {
             options.report_format = REPORTER_FORMAT_CSV;
+        } else if (strcmp(argv[i], "--output=json") == 0) {
+            options.report_format = REPORTER_FORMAT_JSON;
         } else if (strcmp(argv[i], "user") == 0) {
             type = CPU_USAGE_USER;
         } else if (atoi(argv[i]) > 0) {

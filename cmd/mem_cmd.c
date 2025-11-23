@@ -18,6 +18,8 @@ int run_mem_cmd(int argc, char *argv[]) {
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--output=csv") == 0) {
             options.report_format = REPORTER_FORMAT_CSV;
+        } else if (strcmp(argv[i], "--output=json") == 0) {
+            options.report_format = REPORTER_FORMAT_JSON;
         } else if (atoi(argv[i]) > 0) {
             options.interval = atoi(argv[i]);
         }
