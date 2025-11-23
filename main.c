@@ -4,6 +4,7 @@
 #include "cmd/cpu_cmd.h"
 #include "cmd/mem_cmd.h"
 #include "cmd/disk_cmd.h"
+#include "cmd/net_cmd.h"
 #include "util/log_util.h"
 
 int main(int argc, char *argv[]) {
@@ -18,6 +19,8 @@ int main(int argc, char *argv[]) {
         return run_mem_cmd(argc - 1, argv + 1);
     } else if (strcmp(argv[1], "disk") == 0) {
         return run_disk_cmd(argc - 1, argv + 1);
+    } else if (strcmp(argv[1], "net") == 0) {
+        return run_net_cmd(argc - 1, argv + 1);
     }
 
     LOG_ERROR("Unknown command: %s", argv[1]);

@@ -41,3 +41,32 @@ int read_mem_info(struct mem_info *mem_info) {
     fclose(file);
     return 0;
 }
+
+int read_net_dev_stats(struct net_dev_stats *stats) {
+    FILE *file = fopen("/proc/net/dev", "r");
+    if (!file) {
+        perror("Unable to open /proc/net/dev");
+        return -1;
+    }
+
+    char line[256];
+    stats->rx_bytes = 0;
+    stats->tx_bytes = 0;
+
+    // Skip the first two header lines
+    fgets(line, sizeof(line), file);
+    fgets(line, sizeof(line), file);
+
+    while (fgets(line, sizeof(line), file)) {
+        char iface[32];
+        long rx_bytes, tx_bytes;
+        if (sscanf(line, " %31[^:]: %ld %*s %*s %*s %*s %*s %*s %*s %ld",
+                   iface, &rx_bytes, &tx_bytes) == 3) {
+            stats->rx_bytes += rx_bytes;
+            stats->tx_bytes += tx_bytes;
+        }
+    }
+
+    fclose(file);
+    return 0;
+}

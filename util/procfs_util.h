@@ -25,4 +25,15 @@ struct mem_info {
  */
 int read_mem_info(struct mem_info *mem_info);
 
+struct net_dev_stats {
+    long rx_bytes;
+    long tx_bytes;
+};
+
+/*
+ * Read network device statistics from /proc/net/dev.
+ * Returns 0 on success, -1 on failure.
+ */
+int read_net_dev_stats(struct net_dev_stats *stats);
+
 #endif /* CORE_PROCFS_H */
