@@ -22,3 +22,22 @@ int read_cpu_time(struct cpu_time *cpu_time) {
     fclose(file);
     return 0;
 }
+
+int read_mem_info(struct mem_info *mem_info) {
+    FILE *file = fopen("/proc/meminfo", "r");
+    if (!file) {
+        perror("Unable to open /proc/meminfo");
+        return -1;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        if (sscanf(line, "MemTotal: %ld kB", &mem_info->total_kb) == 1)
+            continue;
+        if (sscanf(line, "MemFree: %ld kB", &mem_info->free_kb) == 1)
+            continue;
+    }
+
+    fclose(file);
+    return 0;
+}

@@ -14,4 +14,15 @@ struct cpu_time {
  */
 int read_cpu_time(struct cpu_time *cpu_time);
 
+struct mem_info {
+    long total_kb;
+    long free_kb;
+};
+
+/*
+ * Read memory info from /proc/meminfo.
+ * Returns 0 on success, -1 on failure.
+ */
+int read_mem_info(struct mem_info *mem_info);
+
 #endif /* CORE_PROCFS_H */

@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "cmd/cpu_cmd.h"
+#include "cmd/mem_cmd.h"
 #include "util/log_util.h"
 
 int main(int argc, char *argv[]) {
@@ -12,6 +13,8 @@ int main(int argc, char *argv[]) {
 
     if (strcmp(argv[1], "cpu") == 0) {
         return run_cpu_cmd(argc - 1, argv + 1);
+    } else if (strcmp(argv[1], "mem") == 0) {
+        return run_mem_cmd(argc - 1, argv + 1);
     }
 
     LOG_ERROR("Unknown command: %s", argv[1]);
