@@ -68,9 +68,29 @@ static int disk_compute_metrics(Probe *self, ProbeOptions *options) {
 
 static int disk_display(Probe *self, ProbeOptions *options) {
     disk_probe_data_t *data = (disk_probe_data_t *)self->private_data;
-    printf("Disk Usage for /: Total: %ld kB, Free: %ld kB, Usage: %.2f%%\n",
-           data->root_total_kb, data->root_free_kb, data->root_usage_percent);
-    LOG_INFO("Disk Usage for /: Total: %ld kB, Free: %ld kB, Usage: %.2f%%",
-             data->root_total_kb, data->root_free_kb, data->root_usage_percent);
+    reporter_format_t format = options->report_format;
+    report_data_t disk_usage_data = {
+        .title = "Disk Usage for /",
+        .entries = {
+            [0] = {
+                .key = "Total",
+                .value = (double)data->root_total_kb,
+                .value_suffix = " kB"
+            },
+            [1] = {
+                .key = "Free",
+                .value = (double)data->root_free_kb,
+                .value_suffix = " kB"
+            },
+            [2] = {
+                .key = "Usage",
+                .value = data->root_usage_percent,
+                .value_suffix = " %"
+            }
+        },
+        .num_entries = 3
+    };
+
+    report_data(get_reporter(format), &disk_usage_data);
     return 0;
 }

@@ -1,8 +1,11 @@
 #ifndef PROBE_H
 #define PROBE_H
 
+#include "../report/reporter.h"
+
 typedef struct ProbeOptions {
     int interval;
+    reporter_format_t report_format;
     void *extra;
 } ProbeOptions;
 

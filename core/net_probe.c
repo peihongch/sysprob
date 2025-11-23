@@ -88,9 +88,24 @@ static inline double net_rate_kbps(double rate_bytes) {
 
 static int net_display(Probe *self, ProbeOptions *options) {
     net_probe_data_t *data = (net_probe_data_t *)self->private_data;
-    printf("Network RX Rate: %.2f Kb/s, TX Rate: %.2f Kb/s\n",
-              net_rate_kbps(data->rx_rate), net_rate_kbps(data->tx_rate));
-    LOG_INFO("Network RX Rate: %.2f Kb/s, TX Rate: %.2f Kb/s",
-             net_rate_kbps(data->rx_rate), net_rate_kbps(data->tx_rate));
+    reporter_format_t format = options->report_format;
+    report_data_t net_rate_data = {
+        .title = "Network Throughput",
+        .entries = {
+            [0] = {
+                .key = "RX Rate",
+                .value = net_rate_kbps(data->rx_rate),
+                .value_suffix = " Kb/s",
+            },
+            [1] = {
+                .key = "TX Rate",
+                .value = net_rate_kbps(data->tx_rate),
+                .value_suffix = " Kb/s",
+            }
+        },
+        .num_entries = 2,
+    };
+
+    report_data(get_reporter(format), &net_rate_data);
     return 0;
 }

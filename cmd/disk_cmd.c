@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "disk_cmd.h"
 #include "../core/probe.h"
@@ -8,14 +9,17 @@
 
 int run_disk_cmd(int argc, char *argv[]) {
     Probe *disk_probe;
-    ProbeOptions options;
-    int interval = 1;
+    ProbeOptions options = {
+        .interval = 1,
+        .report_format = REPORTER_FORMAT_TEXT,
+    };
+    int i;
 
-    if (argc >= 2) {
-        interval = atoi(argv[1]);
-        if (interval <= 0) {
-            interval = 1;
-            LOG_WARN("Interval must be a positive number, use default %ds.", interval);
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--output=csv") == 0) {
+            options.report_format = REPORTER_FORMAT_CSV;
+        } else if (atoi(argv[i]) > 0) {
+            options.interval = atoi(argv[i]);
         }
     }
 
@@ -25,7 +29,6 @@ int run_disk_cmd(int argc, char *argv[]) {
         return -1;
     }
 
-    options.interval = interval;
     options.extra = NULL;
     run_probe(disk_probe, &options);
 

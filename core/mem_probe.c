@@ -85,13 +85,29 @@ static int mem_compute_metrics(Probe *self, ProbeOptions *options) {
 
 static int mem_display(Probe *self, ProbeOptions *options) {
     mem_probe_data_t *data = (mem_probe_data_t *)self->private_data;
-    printf("Memory Usage: %.2f%% (Total: %ld kB, Free: %ld kB)\n",
-           data->mem_usage_percent,
-           data->total_mem_kb,
-           data->free_mem_kb);
-    LOG_INFO("Memory Usage: %.2f%% (Total: %ld kB, Free: %ld kB)",
-             data->mem_usage_percent,
-             data->total_mem_kb,
-             data->free_mem_kb);
+    reporter_format_t format = options->report_format;
+    report_data_t mem_usage_data = {
+        .title = "Memory Usage",
+        .entries = {
+            [0] = {
+                .key = "Usage",
+                .value = data->mem_usage_percent,
+                .value_suffix = "%"
+            },
+            [1] = {
+                .key = "Total",
+                .value = (double)data->total_mem_kb,
+                .value_suffix = " kB"
+            },
+            [2] = {
+                .key = "Free",
+                .value = (double)data->free_mem_kb,
+                .value_suffix = " kB"
+            }
+        },
+        .num_entries = 3
+    };
+
+    report_data(get_reporter(format), &mem_usage_data);
     return 0;
 }

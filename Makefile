@@ -5,6 +5,7 @@ OBJS = main.o \
 	cmd/cpu_cmd.o cmd/mem_cmd.o cmd/disk_cmd.o cmd/net_cmd.o \
 	core/cpu_probe.o core/probe.o core/mem_probe.o core/disk_probe.o core/net_probe.o \
 	plugin/plugin.o \
+	report/reporter.o report/text_reporter.o report/csv_reporter.o \
 	util/procfs_util.o util/logger.o
 
 all: sysprob cpu_usage_plugin.so mem_usage_plugin.so

@@ -6,6 +6,7 @@
 #include "cpu_probe.h"
 #include "../util/procfs_util.h"
 #include "../util/logger.h"
+#include "../report/reporter.h"
 
 static int cpu_init(Probe *self);
 static int cpu_collect(Probe *self, ProbeOptions *options);
@@ -103,17 +104,28 @@ static int cpu_compute_metrics(Probe *self, ProbeOptions *options) {
 static int cpu_display(Probe *self, ProbeOptions *options) {
     cpu_usage_type_t type = (cpu_usage_type_t)options->extra;
     cpu_probe_data_t *data = (cpu_probe_data_t *)self->private_data;
+    reporter_format_t format = options->report_format;
+    report_data_t cpu_usage_data = {
+        .title = "CPU Usage",
+        .entries = {
+            [0] = {
+                .value = data->cpu_usage,
+                .value_suffix = "%",
+            }
+        },
+        .num_entries = 1,
+    };
 
     switch (type) {
     case CPU_USAGE_TOTAL:
-        printf("CPU Total Usage: %.2f%%\n", data->cpu_usage);
-        LOG_INFO("CPU Total Usage: %.2f%%", data->cpu_usage);
+        cpu_usage_data.entries[0].key = "Total";
         break;
     case CPU_USAGE_USER:
-        printf("CPU User Usage: %.2f%%\n", data->cpu_usage);
-        LOG_INFO("CPU User Usage: %.2f%%", data->cpu_usage);
+        cpu_usage_data.entries[0].key = "User";
         break;
     }
+
+    report_data(get_reporter(format), &cpu_usage_data);
     return 0;
 }
 
