@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall
+PICFLAGS = -Wall -fPIC
 
 OBJS = main.o \
 	cmd/cpu_cmd.o cmd/mem_cmd.o cmd/disk_cmd.o cmd/net_cmd.o cmd/summary_cmd.o \
@@ -14,17 +15,22 @@ all: sysprob cpu_usage_plugin.so mem_usage_plugin.so
 sysprob: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) -ldl
 
-CPU_USAGE_PLUGIN_OBJS = plugin/cpu_usage.o core/probe.o core/cpu_probe.o \
-	util/logger.o util/procfs_util.o
+# 插件目标文件 - 使用 PIC 编译
+PLUGIN_OBJS = plugin/cpu_usage_plugin.o plugin/mem_usage_plugin.o \
+	core/probe_plugin.o core/cpu_probe_plugin.o core/mem_probe_plugin.o \
+	util/logger_plugin.o util/procfs_util_plugin.o
 
-cpu_usage_plugin.so: $(CPU_USAGE_PLUGIN_OBJS)
-	$(CC) -shared -o $@ $(CPU_USAGE_PLUGIN_OBJS) -ldl
+cpu_usage_plugin.so: plugin/cpu_usage_plugin.o core/probe_plugin.o core/cpu_probe_plugin.o util/logger_plugin.o util/procfs_util_plugin.o
+	$(CC) -shared -o $@ $^ -ldl
 
-MEM_USAGE_PLUGIN_OBJS = plugin/mem_usage.o core/probe.o core/mem_probe.o \
-	util/logger.o util/procfs_util.o
+mem_usage_plugin.so: plugin/mem_usage_plugin.o core/probe_plugin.o core/mem_probe_plugin.o util/logger_plugin.o util/procfs_util_plugin.o
+	$(CC) -shared -o $@ $^ -ldl
 
-mem_usage_plugin.so: $(MEM_USAGE_PLUGIN_OBJS)
-	$(CC) -shared -o $@ $(MEM_USAGE_PLUGIN_OBJS) -ldl
+# 为插件创建 PIC 编译规则
+%_plugin.o: %.c
+	$(CC) $(PICFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) $(CPU_USAGE_PLUGIN_OBJS) $(MEM_USAGE_PLUGIN_OBJS) sysprob *.so
+	rm -f $(OBJS) $(PLUGIN_OBJS) sysprob *.so
+
+.PHONY: all clean
