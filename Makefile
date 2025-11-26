@@ -27,7 +27,7 @@ mem_usage_plugin.so: plugin/mem_usage_plugin.o core/probe_plugin.o core/mem_prob
 	$(CC) -shared -o $@ $^ -ldl
 
 # 为插件创建 PIC 编译规则
-%_plugin.o: %.c
+%_plugin.o: %_plugin.c
 	$(CC) $(PICFLAGS) -c -o $@ $<
 
 clean:
